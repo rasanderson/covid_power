@@ -19,16 +19,26 @@ max_pop <- 15
 
 # Define % increase in Covid in non-detects, on the assumption that this Covid
 # is actually causing their IID
-non_det_xs <- 10 # % increase in Covid
+non_det_xs_pct <- 10 # % increase in Covid
+non_det_xs <- non_det_xs_pct/100 + 1
 # Sample range to check
 min_samp <- 250
 max_samp <- 2000
 stp_samp <- 50
 samp_range <- seq(min_samp, max_samp, by = stp_samp)
-# Draws per sample
+# Draws per sample (not implemented yet)
 drw_samp <- 100
 
 for(trial in samp_range){
-  detect_thresh <- runif(1, min = min_pop/100, max = max_pop/100)
-  detect_with_covid <- 
+  det_thresh <- runif(1, min = min_pop/100, max = max_pop/100)
+  det_with_covid <- ifelse(runif(trial, 0, 1) > det_thresh, 0, 1)
+  nondet_with_covid <- ifelse(runif(trial, 0, 1) > (det_thresh * non_det_xs ), 0, 1)
+  # Assemble into data.frame
+  dat_for_check <- data.frame(
+    freq = c(det_with_covid, nondet_with_covid),
+    source = c(rep("det", trial), rep("nondet", trial))
+  )
+  # Structure of data not right or maybe need a chi-sq
+  mod_res <- MASS::loglm(freq ~ source, data = dat_for_check)
+  # Count whether mod_res is significant and tally for different trial sizes
 }
